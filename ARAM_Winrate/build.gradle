@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+
+	//실행을 위해서 추가.
+	id 'application'
+
+	id 'org.springframework.boot' version '3.5.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.koo'
+version = '0.0.1-SNAPSHOT'
+description = 'LOL ARAM winrate site'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//org.json 의존성 추가
+	implementation 'org.json:json:20231013'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+// build.gradle 파일 맨 아래에 추가
+application {
+    // 👇 실행하려는 파일의 패키지 이름을 포함한 전체 경로를 적어줍니다.
+    mainClass = 'com.koo.ARAM_Winrate.Api_Parsing'
+}
+
+// 자바 컴파일 시 인코딩을 UTF-8로 설정
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+// 애플리케이션 실행 시 JVM에 UTF-8 인코딩 옵션 전달
+application {
+    applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8"]
+}
+
+// bootRun 작업에도 동일하게 적용 (스프링 부트 서버 실행용)
+tasks.named('bootRun') {
+    jvmArgs = ["-Dfile.encoding=UTF-8"]
+}
