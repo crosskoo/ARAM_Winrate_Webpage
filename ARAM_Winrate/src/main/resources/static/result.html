@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARAM 승패 점수 결과</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">&larr; 다시 확인하기</a>
+        <h1>ARAM 승패 점수 ⚔️</h1>
+        <div id="result-card" class="card">
+            <div class="score-header">
+                <h2 id="user-name"></h2>
+                <button id="reset-button">점수 초기화</button>
+            </div>
+            <p class="score" id="user-score"></p>
+            <p class="update-info" id="update-info"></p>
+            <div id="last-match-info" class="last-match-grid"></div>
+        </div>
+        <div id="loader" class="loader hidden"></div>
+        <p id="error-message" class="error"></p>
+    </div>
+    <script src="result.js"></script>
+</body>
+</html>

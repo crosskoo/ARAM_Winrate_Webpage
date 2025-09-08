@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    text-align: center;
+    background-color: #162447;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+}
+
+h1 {
+    color: #00a8ff;
+    margin-bottom: 30px;
+}
+
+.card {
+    background-color: #1f4068;
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.input-group {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input {
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    border: 1px solid #00a8ff;
+    border-radius: 6px;
+    background-color: #1a1a2e;
+    color: #e0e0e0;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #00a8ff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #007bff;
+}
+
+.score {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fbc531;
+    margin: 15px 0;
+}
+
+.update-info {
+    margin-top: 15px;
+    color: #b8b8b8;
+    height: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #00a8ff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error {
+    color: #ff4757;
+    margin-top: 15px;
+}
+
+.back-link {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #00a8ff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#reset-button {
+    width: auto;
+    padding: 8px 12px;
+    font-size: 14px;
+    background-color: #ff4757;
+}
+#reset-button:hover {
+    background-color: #e84118;
+}
+
+.last-match-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    text-align: left;
+    margin-top: 15px;
+    color: #e0e0e0;
+}
+.last-match-grid .result.win {
+    color: #2ed573;
+}
+.last-match-grid .result.loss {
+    color: #ff4757;
+}
