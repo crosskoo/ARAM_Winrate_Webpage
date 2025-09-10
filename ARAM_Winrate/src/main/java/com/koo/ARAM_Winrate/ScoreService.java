@@ -2,15 +2,18 @@ package com.koo.ARAM_Winrate;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder; // 1. URLEncoder import 추가
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets; // 2. StandardCharsets import 추가
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +26,9 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ScoreService {
-    private static final String API_KEY = "RGAPI-2cc73764-3455-4d00-a177-d5740ec1f433"; // 본인의 API 키로 교체
+    @Value("${riot.api.key}")
+    private String apiKey;
+
     private static final String ASIA_ACCOUNT_API_URL = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id";
     private static final String ASIA_MATCH_API_URL = "https://asia.api.riotgames.com/lol/match/v5/matches";
     private static final String USER_DATA_FOLDER = "user_data";
@@ -73,7 +78,7 @@ public class ScoreService {
         String puuid = getPuuid(gameName, tagLine);
         if (puuid == null) throw new RuntimeException("PUUID를 찾을 수 없습니다.");
 
-        List<String> newMatchIds = getAramMatchIdsAfter(puuid, lastUpdatedTimestamp, 0); // lastUpdatedTimestamp 이후 모든 경기
+        List<String> newMatchIds = getAramMatchIdsAfter(puuid, lastUpdatedTimestamp, 0);
 
         int newWins = 0;
         int newLosses = 0;
@@ -93,18 +98,17 @@ public class ScoreService {
         response.put("newWins", newWins);
         response.put("newLosses", newLosses);
         response.put("updatedData", loadUserDataAsMap(gameName, tagLine));
-        response.put("lastMatch", getLastMatchInfo(puuid)); // 마지막 게임 정보 추가
+        response.put("lastMatch", getLastMatchInfo(puuid));
         return response;
     }
 
-    // 가장 최근 칼바람 매치 1개의 정보를 가져오는 메서드
     private Map<String, Object> getLastMatchInfo(String puuid) throws IOException, InterruptedException {
-        List<String> lastMatchIdList = getAramMatchIdsAfter(puuid, 0, 1); // 모든 시간대에서 최신 1개
+        List<String> lastMatchIdList = getAramMatchIdsAfter(puuid, 0, 1);
         if (lastMatchIdList.isEmpty()) {
             return null;
         }
         String lastMatchId = lastMatchIdList.get(0);
-        String url = String.format("%s/%s?api_key=%s", ASIA_MATCH_API_URL, lastMatchId, API_KEY);
+        String url = String.format("%s/%s?api_key=%s", ASIA_MATCH_API_URL, lastMatchId, apiKey);
         HttpResponse<String> response = sendRequest(url);
 
         if (response.statusCode() == 200) {
@@ -136,9 +140,12 @@ public class ScoreService {
         return Map.of("message", "저장된 데이터가 없습니다.");
     }
 
-
     private String getPuuid(String gameName, String tagLine) throws IOException, InterruptedException {
-        String url = String.format("%s/%s/%s?api_key=%s", ASIA_ACCOUNT_API_URL, gameName, tagLine, API_KEY);
+        // 3. gameName과 tagLine을 UTF-8 방식으로 URL 인코딩
+        String encodedGameName = URLEncoder.encode(gameName, StandardCharsets.UTF_8);
+        String encodedTagLine = URLEncoder.encode(tagLine, StandardCharsets.UTF_8);
+
+        String url = String.format("%s/%s/%s?api_key=%s", ASIA_ACCOUNT_API_URL, encodedGameName, encodedTagLine, apiKey);
         HttpResponse<String> response = sendRequest(url);
         return (response.statusCode() == 200) ? new JSONObject(response.body()).getString("puuid") : null;
     }
@@ -146,18 +153,18 @@ public class ScoreService {
     private List<String> getAramMatchIdsAfter(String puuid, long startTimeSeconds, int count) throws IOException, InterruptedException {
         List<String> allMatchIds = new ArrayList<>();
         int start = 0;
-        int totalCount = (count == 0) ? 100 : count; // count가 0이면 100개씩, 아니면 지정된 만큼
+        int totalCount = (count == 0) ? 100 : count;
 
         while (true) {
             String url = String.format("%s/by-puuid/%s/ids?queue=450&startTime=%d&start=%d&count=%d&api_key=%s",
-                    ASIA_MATCH_API_URL, puuid, startTimeSeconds, start, totalCount, API_KEY);
+                    ASIA_MATCH_API_URL, puuid, startTimeSeconds, start, totalCount, apiKey);
             HttpResponse<String> response = sendRequest(url);
             if (response.statusCode() == 200) {
                 JSONArray arr = new JSONArray(response.body());
                 if (arr.length() == 0) break;
                 for (int i = 0; i < arr.length(); i++) allMatchIds.add(arr.getString(i));
                 
-                if (count != 0 || arr.length() < 100) break; // count가 지정되었거나, 더이상 가져올 데이터가 없으면 종료
+                if (count != 0 || arr.length() < 100) break;
                 start += 100;
 
             } else {
@@ -172,7 +179,7 @@ public class ScoreService {
         int wins = 0, losses = 0;
         for (String matchId : matchIds) {
             TimeUnit.MILLISECONDS.sleep(1200);
-            String url = String.format("%s/%s?api_key=%s", ASIA_MATCH_API_URL, matchId, API_KEY);
+            String url = String.format("%s/%s?api_key=%s", ASIA_MATCH_API_URL, matchId, apiKey);
             HttpResponse<String> response = sendRequest(url);
             if (response.statusCode() == 200) {
                 JSONArray participants = new JSONObject(response.body()).getJSONObject("info").getJSONArray("participants");
