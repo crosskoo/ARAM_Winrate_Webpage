@@ -9,11 +9,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder; // 1. URLEncoder import 추가
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets; // 2. StandardCharsets import 추가
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,25 +47,50 @@ public class ScoreService {
         Path userDataFile = getUserDataFilePath(gameName, tagLine);
 
         if (Files.exists(userDataFile)) {
-            response = updateScore(gameName, tagLine);
-            response.put("isInitialized", true);
+            Properties userData = loadUserData(gameName, tagLine);
+            // targetScore가 있는지 확인
+            if (userData.getProperty("targetScore") == null) {
+                response.put("isInitialized", true);
+                response.put("needsTargetScore", true); // targetScore가 필요하다는 플래그
+                response.put("updatedData", loadUserDataAsMap(gameName, tagLine));
+            } else {
+                response = updateScore(gameName, tagLine);
+                response.put("isInitialized", true);
+                response.put("needsTargetScore", false);
+            }
         } else {
             response.put("isInitialized", false);
         }
         return response;
     }
 
-    public Map<String, Object> initialSetup(String gameName, String tagLine, int score) {
+    public Map<String, Object> initialSetup(String gameName, String tagLine, int score, int targetScore) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         Properties userData = new Properties();
         userData.setProperty("gameName", gameName);
         userData.setProperty("tagLine", tagLine);
+        userData.setProperty("initialScore", String.valueOf(score));
         userData.setProperty("score", String.valueOf(score));
+        userData.setProperty("targetScore", String.valueOf(targetScore));
         userData.setProperty("lastUpdatedTimestamp", String.valueOf(currentTimestamp));
         saveUserData(gameName, tagLine, userData);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "초기 설정 완료");
+        response.put("userData", loadUserDataAsMap(gameName, tagLine));
+        return response;
+    }
+    
+    // 기존 사용자의 targetScore를 설정하는 메서드
+    public Map<String, Object> setTargetScore(String gameName, String tagLine, int targetScore) {
+        Properties userData = loadUserData(gameName, tagLine);
+        userData.setProperty("targetScore", String.valueOf(targetScore));
+        // 목표 점수 설정 시, 현재 점수를 초기 점수로 설정
+        userData.setProperty("initialScore", userData.getProperty("score"));
+        saveUserData(gameName, tagLine, userData);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "목표 점수 설정 완료");
         response.put("userData", loadUserDataAsMap(gameName, tagLine));
         return response;
     }
@@ -141,7 +166,6 @@ public class ScoreService {
     }
 
     private String getPuuid(String gameName, String tagLine) throws IOException, InterruptedException {
-        // 3. gameName과 tagLine을 UTF-8 방식으로 URL 인코딩
         String encodedGameName = URLEncoder.encode(gameName, StandardCharsets.UTF_8);
         String encodedTagLine = URLEncoder.encode(tagLine, StandardCharsets.UTF_8);
 
