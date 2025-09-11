@@ -14,41 +14,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetButton = document.getElementById('reset-button');
     const loader = document.getElementById('loader');
     const errorMessage = document.getElementById('error-message');
+    
+    // 레이아웃 제어를 위해 왼쪽 background-pane 요소 가져오기
+    const backgroundPane = document.querySelector('.background-pane');
+    const imageBackground = document.getElementById('image-background');
     const videoContainer = document.getElementById('video-background-container');
     const video = document.getElementById('complete-video');
 
-    // 배경화면 업데이트 함수 수정
     const updateBackground = (progress) => {
         let imageUrl = '';
-        videoContainer.classList.add('hidden'); // 비디오 기본적으로 숨김
-        document.body.style.backgroundImage = ''; // 이미지 초기화
+        videoContainer.classList.add('hidden');
+        imageBackground.style.backgroundImage = '';
+        imageBackground.classList.remove('hidden');
 
         if (progress < 25) {
-            imageUrl = 'url("/images/progress_1.jpg")';
+            imageUrl = 'url("/images/progress_1.png")';
         } else if (progress < 50) {
-            imageUrl = 'url("/images/progress_2.jpg")';
+            imageUrl = 'url("/images/progress_2.png")';
         } else if (progress < 75) {
-            imageUrl = 'url("/images/progress_3.jpg")';
+            imageUrl = 'url("/images/progress_3.png")';
         } else if (progress < 100) {
-            imageUrl = 'url("/images/progress_4.jpg")';
+            imageUrl = 'url("/images/progress_4.png")';
         } else {
-            // 100% 달성 시 비디오 표시
+            imageBackground.classList.add('hidden');
             videoContainer.classList.remove('hidden');
             video.play();
-            return; // 이미지 설정을 건너뛰기
+            return;
         }
-        document.body.style.backgroundImage = imageUrl;
+        imageBackground.style.backgroundImage = imageUrl;
     };
-
-    userNameEl.textContent = `${userData.gameName}#${userData.tagLine}`;
 
     if (aramData.isInitialized) {
         if (aramData.needsTargetScore) {
+            // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+            backgroundPane.style.display = 'none'; // 왼쪽 배경 영역 숨기기
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
             const currentScore = aramData.updatedData.score;
             const resultCard = document.getElementById('result-card');
             resultCard.innerHTML = `
                 <h2>목표 점수 설정</h2>
-                <p>현재 점수: ${currentScore}</p>
+                <p>현재 점수: ${currentScore || 0}</p>
                 <p>새로운 목표 점수를 설정해주세요.</p>
                 <div class="input-group">
                     <input type="number" id="target-score" placeholder="목표 점수 입력">
@@ -65,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     errorMessage.textContent = '목표 점수를 입력해주세요.';
                     return;
                 }
-                if (parseInt(currentScore) >= parseInt(targetScore)) {
+                if (parseInt(currentScore || 0) >= parseInt(targetScore)) {
                     errorMessage.textContent = '목표 점수는 현재 점수보다 높아야 합니다.';
                     return;
                 }
@@ -88,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const errorData = await response.json();
                         throw new Error(errorData.message || '설정 중 오류 발생');
                     }
-                    
+
                     const checkResponse = await fetch(`/api/check?gameName=${encodeURIComponent(userData.gameName)}&tagLine=${encodeURIComponent(userData.tagLine)}`);
                     const result = await checkResponse.json();
                     sessionStorage.setItem('aram-data', JSON.stringify(result));
@@ -102,22 +108,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } else {
+            userNameEl.textContent = `${userData.gameName}#${userData.tagLine}`;
             const { newWins, newLosses, updatedData, lastMatch } = aramData;
             const initialScore = parseFloat(updatedData.initialScore);
             const currentScore = parseFloat(updatedData.score);
             const targetScore = parseFloat(updatedData.targetScore);
 
-            userScoreEl.textContent = `${currentScore} / ${targetScore}`;
-            updateInfoEl.textContent = `(최근 ${newWins}승 ${newLosses}패 반영)`;
-
             let progress = 0;
-            if (targetScore - initialScore > 0) {
-                progress = ((currentScore - initialScore) / (targetScore - initialScore)) * 100;
+            const goalRange = targetScore - initialScore;
+            const currentProgress = currentScore - initialScore;
+
+            if (goalRange > 0) {
+                progress = (currentProgress / goalRange) * 100;
             } else if (currentScore >= targetScore) {
                 progress = 100;
             }
-            progress = Math.max(0, Math.min(100, progress));
 
+            progress = Math.max(0, Math.min(100, progress));
+            
+            userScoreEl.textContent = `${currentScore} / ${targetScore}점`;
+            
+            updateInfoEl.textContent = `(최근 ${newWins}승 ${newLosses}패 반영)`;
             updateBackground(progress);
 
             if (lastMatch) {
@@ -134,23 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     } else {
+        // ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 수정된 부분 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼
+        backgroundPane.style.display = 'none'; // 왼쪽 배경 영역 숨기기
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
         const resultCard = document.getElementById('result-card');
         resultCard.innerHTML = `
             <h2>점수 초기 설정</h2>
             <p>데이터가 없습니다. 현재 점수와 목표 점수를 입력해주세요.</p>
             <div class="input-group">
-                <input type="number" id="initial-score" placeholder="현재 점수 입력">
+                <input type="number" id="current-score" placeholder="현재 점수 입력">
                 <input type="number" id="target-score" placeholder="목표 점수 입력">
             </div>
             <button id="setup-button">설정 완료</button>
         `;
 
         const setupButton = document.getElementById('setup-button');
-        const initialScoreInput = document.getElementById('initial-score');
+        const currentScoreInput = document.getElementById('current-score');
         const targetScoreInput = document.getElementById('target-score');
 
         setupButton.addEventListener('click', async () => {
-            const score = initialScoreInput.value;
+            const score = currentScoreInput.value;
             const targetScore = targetScoreInput.value;
             if (!score || !targetScore) {
                 errorMessage.textContent = '현재 점수와 목표 점수를 모두 입력해주세요.';
@@ -194,32 +209,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    resetButton.addEventListener('click', async () => {
-        if (!confirm('정말로 점수를 초기화하시겠습니까?')) {
-            return;
-        }
-        loader.classList.remove('hidden');
-        errorMessage.textContent = '';
-        try {
-            const response = await fetch('/api/reset', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    gameName: userData.gameName,
-                    tagLine: userData.tagLine,
-                }),
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '초기화 중 오류 발생');
+    if (resetButton) {
+        resetButton.addEventListener('click', async () => {
+            if (!confirm('정말로 점수를 초기화하시겠습니까?')) {
+                return;
             }
-            alert('점수가 초기화되었습니다.');
-            sessionStorage.removeItem('aram-data');
-            window.location.href = 'index.html';
-        } catch (error) {
-            errorMessage.textContent = error.message;
-        } finally {
-            loader.classList.add('hidden');
-        }
-    });
+            loader.classList.remove('hidden');
+            errorMessage.textContent = '';
+            try {
+                const response = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gameName: userData.gameName,
+                        tagLine: userData.tagLine,
+                    }),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || '초기화 중 오류 발생');
+                }
+                alert('점수가 초기화되었습니다.');
+                sessionStorage.removeItem('aram-data');
+                window.location.href = 'index.html';
+            } catch (error) {
+                errorMessage.textContent = error.message;
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+    }
 });

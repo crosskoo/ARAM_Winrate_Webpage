@@ -7,26 +7,33 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="video-background-container" class="hidden">
-        <video id="complete-video" loop muted autoplay playsinline>
-            <source src="/images/progress_5_complete.mp4" type="video/mp4">
-        </video>
-    </div>
-
-    <div class="container">
-        <a href="/" class="back-link">&larr; 다시 확인하기</a>
-        <h1>ARAM 승패 점수 ⚔️</h1>
-        <div id="result-card" class="card">
-            <div class="score-header">
-                <h2 id="user-name"></h2>
-                <button id="reset-button">점수 초기화</button>
+    <div class="main-layout-container">
+        <div class="background-pane">
+            <div id="image-background"></div>
+            <div id="video-background-container" class="hidden">
+                <video id="complete-video" loop muted autoplay playsinline>
+                    <source src="/images/progress_5_complete.mp4" type="video/mp4">
+                </video>
             </div>
-            <p class="score" id="user-score"></p>
-            <p class="update-info" id="update-info"></p>
-            <div id="last-match-info" class="last-match-grid"></div>
         </div>
-        <div id="loader" class="loader hidden"></div>
-        <p id="error-message" class="error"></p>
+
+        <div class="content-pane">
+            <div class="container">
+                <a href="/" class="back-link">&larr; 다시 확인하기</a>
+                <h1>ARAM 승패 점수 ⚔️</h1>
+                <div id="result-card" class="card">
+                    <div class="score-header">
+                        <h2 id="user-name"></h2>
+                        <button id="reset-button">점수 초기화</button>
+                    </div>
+                    <p class="score" id="user-score"></p>
+                    <p class="update-info" id="update-info"></p>
+                    <div id="last-match-info" class="last-match-grid"></div>
+                </div>
+                <div id="loader" class="loader hidden"></div>
+                <p id="error-message" class="error"></p>
+            </div>
+        </div>
     </div>
     <script src="result.js"></script>
 </body>

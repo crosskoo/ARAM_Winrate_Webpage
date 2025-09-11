@@ -26,8 +26,10 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ScoreService {
-    @Value("${riot.api.key}")
-    private String apiKey;
+    //@Value("${riot.api.key}")
+    //private String apiKey;
+
+    private String apiKey = System.getenv("RIOT_API_KEY");
 
     private static final String ASIA_ACCOUNT_API_URL = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id";
     private static final String ASIA_MATCH_API_URL = "https://asia.api.riotgames.com/lol/match/v5/matches";
@@ -48,10 +50,9 @@ public class ScoreService {
 
         if (Files.exists(userDataFile)) {
             Properties userData = loadUserData(gameName, tagLine);
-            // targetScore가 있는지 확인
-            if (userData.getProperty("targetScore") == null) {
+            if (userData.getProperty("targetScore") == null || userData.getProperty("initialScore") == null) {
                 response.put("isInitialized", true);
-                response.put("needsTargetScore", true); // targetScore가 필요하다는 플래그
+                response.put("needsTargetScore", true);
                 response.put("updatedData", loadUserDataAsMap(gameName, tagLine));
             } else {
                 response = updateScore(gameName, tagLine);
@@ -64,13 +65,14 @@ public class ScoreService {
         return response;
     }
 
+    // 신규 사용자용: score는 입력값으로, initialScore는 0으로 고정
     public Map<String, Object> initialSetup(String gameName, String tagLine, int score, int targetScore) {
         long currentTimestamp = System.currentTimeMillis() / 1000;
         Properties userData = new Properties();
         userData.setProperty("gameName", gameName);
         userData.setProperty("tagLine", tagLine);
-        userData.setProperty("initialScore", String.valueOf(score));
-        userData.setProperty("score", String.valueOf(score));
+        userData.setProperty("initialScore", "0"); // 시작 점수는 항상 0
+        userData.setProperty("score", String.valueOf(score)); // 현재 점수는 사용자가 입력한 값
         userData.setProperty("targetScore", String.valueOf(targetScore));
         userData.setProperty("lastUpdatedTimestamp", String.valueOf(currentTimestamp));
         saveUserData(gameName, tagLine, userData);
@@ -81,12 +83,15 @@ public class ScoreService {
         return response;
     }
     
-    // 기존 사용자의 targetScore를 설정하는 메서드
+    // 기존 사용자용: initialScore가 없다면 0으로 설정
     public Map<String, Object> setTargetScore(String gameName, String tagLine, int targetScore) {
         Properties userData = loadUserData(gameName, tagLine);
         userData.setProperty("targetScore", String.valueOf(targetScore));
-        // 목표 점수 설정 시, 현재 점수를 초기 점수로 설정
-        userData.setProperty("initialScore", userData.getProperty("score"));
+        
+        if (userData.getProperty("initialScore") == null) {
+            userData.setProperty("initialScore", "0");
+        }
+        
         saveUserData(gameName, tagLine, userData);
 
         Map<String, Object> response = new HashMap<>();
@@ -187,7 +192,7 @@ public class ScoreService {
                 JSONArray arr = new JSONArray(response.body());
                 if (arr.length() == 0) break;
                 for (int i = 0; i < arr.length(); i++) allMatchIds.add(arr.getString(i));
-                
+
                 if (count != 0 || arr.length() < 100) break;
                 start += 100;
 

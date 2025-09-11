@@ -1,49 +1,92 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 
-body {
+/* 기본 HTML 및 Body 스타일 */
+html, body {
+    height: 100%;
+    margin: 0;
     font-family: 'Noto Sans KR', sans-serif;
     background-color: #1a1a2e;
     color: #e0e0e0;
+}
+
+/* index.html의 body는 중앙 정렬을 위해 flex 사용 */
+body {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
-    /* 배경 이미지 스타일 추가 */
-    background-size: cover;
+}
+
+/* result.html에서는 flex 레이아웃을 사용하지 않음 */
+body:has(.main-layout-container) {
+    display: block;
+}
+
+/* ========================================================== */
+/* ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ result.html 전용 스타일 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
+/* ========================================================== */
+.main-layout-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.background-pane {
+    flex: 1.2;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+#image-background {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
     background-position: center;
-    background-attachment: fixed;
     transition: background-image 0.5s ease-in-out;
 }
 
-/* 비디오 배경을 위한 스타일 추가 */
 #video-background-container {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* 다른 콘텐츠 뒤에 위치 */
-    overflow: hidden;
+    padding: 30px;
+    box-sizing: border-box;
 }
 
 #complete-video {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 화면을 꽉 채우도록 설정 */
+    object-fit: contain;
 }
 
+.content-pane {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
 
+/* (이하 스타일은 이전과 동일) */
 .container {
     text-align: center;
-    background-color: rgba(22, 36, 71, 0.9); /* 배경이 잘 보이도록 반투명 처리 */
+    background-color: #162447;
     padding: 30px 40px;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    width: 90%;
+    width: 100%;
     max-width: 450px;
     position: relative;
-    z-index: 1; /* 비디오보다 위에 위치 */
 }
 
 h1 {
@@ -52,7 +95,7 @@ h1 {
 }
 
 .card {
-    background-color: rgba(31, 64, 104, 0.9); /* 배경이 잘 보이도록 반투명 처리 */
+    background-color: #1f4068;
     padding: 25px;
     border-radius: 8px;
     margin-top: 20px;
