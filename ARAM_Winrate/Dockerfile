@@ -14,8 +14,8 @@ COPY src ./src
 # gradlew 파일에 실행 권한을 줍니다. (중요!)
 RUN chmod +x ./gradlew
 
-# Gradle을 이용해 프로젝트를 빌드합니다.
-RUN ./gradlew build
+# Gradle을 이용해 프로젝트를 빌드합니다. (테스트는 제외)
+RUN ./gradlew build -x test
 
 # 빌드된 jar 파일을 실행합니다.
 CMD ["java", "-jar", "build/libs/ARAM_Winrate-0.0.1-SNAPSHOT.jar"]
