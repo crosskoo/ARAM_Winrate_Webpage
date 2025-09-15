@@ -216,3 +216,68 @@ button:hover {
 .last-match-grid .result.loss {
     color: #ff4757;
 }
+
+/* ========================================================== */
+/* ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 반응형 웹 스타일 ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
+/* ========================================================== */
+
+/* 중간 크기 화면 (예: 태블릿, 작은 데스크톱 창) - 1024px 이하 */
+@media (max-width: 1024px) {
+    .main-layout-container {
+        /* 좌우 패널의 비율을 조정하여 콘텐츠 영역을 조금 더 넓게 표시 */
+        flex-direction: row; /* 가로 배치를 유지 */
+    }
+
+    .background-pane {
+        flex: 1; /* 왼쪽 배경 영역 비율 축소 */
+    }
+
+    .content-pane {
+        flex: 1.2; /* 오른쪽 콘텐츠 영역 비율 확대 */
+    }
+}
+
+/* 작은 크기 화면 (예: 모바일) - 768px 이하 */
+@media (max-width: 768px) {
+    /* 메인 레이아웃을 세로로 변경 */
+    .main-layout-container {
+        flex-direction: column;
+        height: auto; /* 높이를 콘텐츠에 맞게 자동 조절 */
+    }
+
+    /* 배경 이미지 영역의 크기 조절 */
+    .background-pane {
+        flex: 1; /* flex 비율 초기화 */
+        height: 300px; /* 높이를 고정값으로 설정 */
+        width: 100%;
+        padding: 15px; /* 내부 여백 축소 */
+    }
+
+    #video-background-container {
+        padding: 15px; /* 동영상 패딩 축소 */
+    }
+
+    /* 콘텐츠 영역이 전체 너비를 차지하도록 설정 */
+    .content-pane {
+        flex: 1; /* flex 비율 초기화 */
+        width: 100%;
+        padding: 15px; /* 내부 여백 축소 */
+    }
+
+    /* 카드 컨테이너의 최대 너비와 패딩 조절 */
+    .container {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    /* 제목 폰트 크기 축소 */
+    h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* 점수 폰트 크기 축소 */
+    .score {
+        font-size: 36px;
+    }
+}
